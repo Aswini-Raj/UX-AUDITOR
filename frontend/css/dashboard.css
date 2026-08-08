@@ -1,0 +1,6 @@
+/* Dashboard-specific overrides */
+.dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; }
+
+@media (max-width: 1024px) {
+    .dashboard-grid { grid-template-columns: 1fr; }
+}

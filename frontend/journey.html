@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI UX Auditor — Journey Map</title>
+    <meta name="description" content="Visualize user journey steps captured by browser crawlers. Review interaction events, session data, and navigation screenshots.">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .journey-layout {
+            display: grid;
+            grid-template-columns: 1fr 2.2fr;
+            gap: 1.5rem;
+        }
+
+        .step-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            position: relative;
+        }
+
+        .step-timeline::before {
+            content: '';
+            position: absolute;
+            left: 16px;
+            top: 20px;
+            bottom: 20px;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent-color), var(--border-color));
+            z-index: 0;
+        }
+
+        .step-node {
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-node-inner {
+            display: flex;
+            gap: 1rem;
+            background: var(--bg-elevated);
+            padding: 1rem 1.25rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: var(--transition);
+            align-items: center;
+        }
+
+        .step-node-inner:hover { border-color: var(--border-bright); background: var(--bg-hover); }
+        .step-node.active .step-node-inner {
+            border-color: var(--accent-color);
+            background: var(--accent-glow);
+            box-shadow: var(--shadow-glow-sm);
+        }
+
+        .step-node.has-error .step-node-inner {
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .step-node.has-error.active .step-node-inner {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.05);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.15);
+        }
+
+        .step-icon {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .step-icon svg { width: 14px; height: 14px; color: var(--text-muted); }
+
+        .step-node.active .step-icon {
+            background: var(--grad-brand);
+            border-color: transparent;
+            box-shadow: 0 0 10px rgba(99,102,241,0.5);
+        }
+        .step-node.active .step-icon svg { color: #fff; }
+
+        .step-node.has-error .step-icon {
+            border-color: rgba(239, 68, 68, 0.4);
+            background: rgba(239, 68, 68, 0.08);
+        }
+        .step-node.has-error .step-icon svg { color: var(--danger); }
+
+        .step-info { flex: 1; }
+        .step-name { font-weight: 700; font-size: 0.88rem; color: var(--text-primary); margin-bottom: 0.15rem; }
+        .step-url  { font-size: 0.75rem; color: var(--text-muted); font-family: 'Fira Code', monospace; }
+
+        .step-error-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.68rem;
+            color: var(--danger);
+            font-weight: 600;
+            margin-top: 0.2rem;
+        }
+
+        .step-error-indicator svg { width: 10px; height: 10px; }
+
+        .viewer-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.75rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .viewer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.25rem;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .viewer-title { font-size: 1.1rem; font-weight: 700; }
+
+        .viewer-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-retest {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.9rem;
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: var(--radius-sm);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-retest:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        .btn-retest svg { width: 12px; height: 12px; }
+
+        /* Screenshot container */
+        .mock-screenshot {
+            width: 100%;
+            height: 300px;
+            background: var(--bg-elevated);
+            border-radius: var(--radius-md);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed var(--border-bright);
+            color: var(--text-muted);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.82rem;
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screenshot-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* Error overlay on screenshot */
+        .screenshot-error-overlay {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(239, 68, 68, 0.75), transparent);
+            padding: 0.65rem 0.9rem 0.55rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.75rem;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+        }
+        .screenshot-error-overlay svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+        .screenshot-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            width: 100%;
+            height: 100%;
+        }
+
+        .screenshot-placeholder svg { width: 36px; height: 36px; opacity: 0.3; }
+
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .meta-item {
+            background: var(--bg-elevated);
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .meta-item:hover { border-color: var(--border-bright); }
+
+        .meta-label {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .meta-label svg { width: 11px; height: 11px; }
+        .meta-val { font-size: 0.88rem; font-weight: 600; color: var(--text-primary); }
+
+        /* Error details panel */
+        .error-detail-panel {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: var(--radius-md);
+        }
+
+        .error-detail-panel.visible { display: block; }
+
+        .error-detail-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--danger);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-bottom: 0.6rem;
+        }
+        .error-detail-title svg { width: 12px; height: 12px; }
+
+        .error-item-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(239, 68, 68, 0.1);
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+        .error-item-row:last-child { border-bottom: none; }
+        .error-sev-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            flex-shrink: 0;
+            margin-top: 0.05rem;
+        }
+        .sev-critical { background: rgba(239,68,68,0.15); color: #fca5a5; }
+        .sev-high     { background: rgba(245,158,11,0.15); color: #fcd34d; }
+        .sev-medium   { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+        .sev-low      { background: rgba(100,116,139,0.15); color: #94a3b8; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo-container">AI UX Auditor</a>
+        <div class="nav-links">
+            <a href="index.html"><i data-lucide="play-circle"></i> Initialization</a>
+            <a href="dashboard.html"><i data-lucide="activity"></i> Live Workspace</a>
+            <a href="journey.html" class="active"><i data-lucide="map"></i> Journey Map</a>
+            <a href="personas.html"><i data-lucide="users"></i> Personas</a>
+            <a href="findings.html"><i data-lucide="search"></i> UX Intelligence</a>
+            <a href="fixes.html"><i data-lucide="code-2"></i> AI Code Fixes</a>
+            <a href="retest.html"><i data-lucide="refresh-cw"></i> Auto Re-Test</a>
+            <a href="reports.html"><i data-lucide="file-bar-chart"></i> Reports</a>
+            <a href="chat.html"><i data-lucide="bot"></i> UX Copilot</a>
+            <a href="login.html" class="nav-terminate"><i data-lucide="log-out"></i> Terminate</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>Journey Simulation &amp; Capture Stream</h2>
+            <p>Real-time interaction recording trace compiled by the Browser Navigation and Data Collection Agents.</p>
+        </div>
+
+        <div class="journey-layout">
+            <!-- Step Timeline -->
+            <div>
+                <div class="section-title"><i data-lucide="route" style="width:14px;height:14px;color:var(--accent-bright);"></i> Crawl Steps</div>
+                <div class="step-timeline" id="stepTimeline">
+
+                    <div class="step-node active" id="step-1">
+                        <div class="step-node-inner"
+                             onclick="switchStep({
+                                 title: 'Home Entrypoint',
+                                 url: 'https://target.io/',
+                                 clicks: '2', time: '240ms', viewport: '1280px',
+                                 errors: 'No exceptions caught.',
+                                 stepId: 'step-1',
+                                 hasError: false,
+                                 screenshot: 'assets/screenshots/screenshot.png',
+                                 issues: []
+                             })">
+                            <div class="step-icon"><i data-lucide="home"></i></div>
+                            <div class="step-info">
+                                <div class="step-name">Step 1: Home Entrypoint</div>
+                                <div class="step-url">URL: /</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-node has-error" id="step-2">
+                        <div class="step-node-inner"
+                             onclick="switchStep({
+                                 title: 'Authentication Challenge',
+                                 url: 'https://target.io/login',
+                                 clicks: '5', time: '890ms', viewport: '1280px',
+                                 errors: 'Dynamic field-label contrast alerts reported.',
+                                 stepId: 'step-2',
+                                 hasError: true,
+                                 screenshot: 'assets/screenshots/screenshot.png',
+                                 issues: [
+                                     { severity: 'Critical', title: 'Form inputs missing labels', type: 'WCAG' },
+                                     { severity: 'High', title: 'Low contrast ratio on submit button', type: 'WCAG' }
+                                 ]
+                             })">
+                            <div class="step-icon"><i data-lucide="lock"></i></div>
+                            <div class="step-info">
+                                <div class="step-name">Step 2: Authentication Challenge</div>
+                                <div class="step-url">URL: /login</div>
+                                <div class="step-error-indicator">
+                                    <i data-lucide="alert-triangle"></i> 2 issues detected
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-node has-error" id="step-3">
+                        <div class="step-node-inner"
+                             onclick="switchStep({
+                                 title: 'E-Commerce Transaction',
+                                 url: 'https://target.io/checkout',
+                                 clicks: '9', time: '1420ms', viewport: '1280px',
+                                 errors: 'Friction anomalies captured at layout fold.',
+                                 stepId: 'step-3',
+                                 hasError: true,
+                                 screenshot: 'assets/screenshots/screenshot.png',
+                                 issues: [
+                                     { severity: 'High', title: 'Checkout button below fold', type: 'Friction' },
+                                     { severity: 'Medium', title: 'No clear call-to-action visible', type: 'Friction' }
+                                 ]
+                             })">
+                            <div class="step-icon"><i data-lucide="shopping-cart"></i></div>
+                            <div class="step-info">
+                                <div class="step-name">Step 3: E-Commerce Transaction</div>
+                                <div class="step-url">URL: /checkout</div>
+                                <div class="step-error-indicator">
+                                    <i data-lucide="alert-triangle"></i> 2 issues detected
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Viewer Panel -->
+            <div class="viewer-panel">
+                <div class="viewer-header">
+                    <h3 class="viewer-title" id="panelTitle">Home Entrypoint</h3>
+                    <div class="viewer-actions">
+                        <span class="badge badge-success" id="panelBadge">
+                            <i data-lucide="check-circle" style="width:11px;height:11px;"></i> Captured
+                        </span>
+                        <a href="retest.html" class="btn-retest" id="retestBtn" style="display:none;">
+                            <i data-lucide="refresh-cw"></i> Re-Test Page
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Screenshot area -->
+                <div class="mock-screenshot" id="screenshotContainer">
+                    <img id="journeyScreenshot"
+                         src="assets/screenshots/screenshot.png"
+                         alt="Browser screenshot"
+                         class="screenshot-img"
+                         onerror="this.style.display='none'; document.getElementById('screenshotPlaceholder').style.display='flex';">
+                    <div id="screenshotPlaceholder" style="display:none;" class="screenshot-placeholder">
+                        <i data-lucide="monitor"></i>
+                        <span style="font-family:'Fira Code',monospace;">BROWSER SCREENSHOT EMULATION</span>
+                        <div id="panelUrl"
+                             style="font-size:0.78rem;background:rgba(99,102,241,0.1);padding:0.3rem 0.65rem;border-radius:var(--radius-sm);color:var(--accent-bright);border:1px solid var(--border-bright);">
+                            https://target.io/
+                        </div>
+                    </div>
+                    <!-- Error overlay shown on steps with issues -->
+                    <div class="screenshot-error-overlay" id="screenshotErrorOverlay" style="display:none;">
+                        <i data-lucide="alert-triangle"></i>
+                        <span id="screenshotErrorText">Issues detected on this page</span>
+                    </div>
+                </div>
+
+                <!-- Metadata Grid -->
+                <div class="metadata-grid">
+                    <div class="meta-item">
+                        <div class="meta-label"><i data-lucide="mouse-pointer-click"></i> INTERACTION EVENTS</div>
+                        <div class="meta-val" id="metaClicks">2 Clicks / Submissions</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label"><i data-lucide="clock"></i> SESSION DURATION</div>
+                        <div class="meta-val" id="metaTime">240ms Processing</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label"><i data-lucide="monitor"></i> VIEWPORT CAPTURED</div>
+                        <div class="meta-val" id="metaViewport">1280px Wide</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label"><i data-lucide="alert-circle"></i> WARNINGS</div>
+                        <div class="meta-val" id="metaErrors" style="color:var(--success);">No exceptions.</div>
+                    </div>
+                </div>
+
+                <!-- Error Detail Panel (shown when step has issues) -->
+                <div class="error-detail-panel" id="errorDetailPanel">
+                    <div class="error-detail-title">
+                        <i data-lucide="shield-alert"></i>
+                        Issues Detected on This Page
+                    </div>
+                    <div id="errorDetailList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SEV_CLASS = {
+            'Critical': 'sev-critical',
+            'High':     'sev-high',
+            'Medium':   'sev-medium',
+            'Low':      'sev-low'
+        };
+
+        /**
+         * Switches the viewer panel to the selected journey step.
+         * @param {Object} step - Step data object.
+         */
+        function switchStep(step) {
+            // Update active node state
+            document.querySelectorAll('.step-node').forEach(n => n.classList.remove('active'));
+            const targetNode = document.getElementById(step.stepId);
+            if (targetNode) targetNode.classList.add('active');
+
+            // Panel title
+            document.getElementById('panelTitle').innerText = step.title;
+
+            // URL label in placeholder
+            const panelUrl = document.getElementById('panelUrl');
+            if (panelUrl) panelUrl.innerText = step.url;
+
+            // Screenshot display logic
+            const img         = document.getElementById('journeyScreenshot');
+            const placeholder = document.getElementById('screenshotPlaceholder');
+            const errOverlay  = document.getElementById('screenshotErrorOverlay');
+
+            if (step.screenshot) {
+                img.src = step.screenshot + '?t=' + new Date().getTime();
+                img.style.display = 'block';
+                placeholder.style.display = 'none';
+            } else {
+                img.style.display = 'none';
+                placeholder.style.display = 'flex';
+            }
+
+            // Show or hide error overlay on screenshot
+            if (step.hasError && step.issues && step.issues.length) {
+                errOverlay.style.display = 'flex';
+                document.getElementById('screenshotErrorText').innerText =
+                    step.issues.length + ' issue(s) detected on ' + step.url;
+            } else {
+                errOverlay.style.display = 'none';
+            }
+
+            // Metadata
+            document.getElementById('metaClicks').innerText   = step.clicks + ' Clicks / Form Submissions';
+            document.getElementById('metaTime').innerText     = step.time + ' Total Processing Window';
+            document.getElementById('metaViewport').innerText = step.viewport + ' Grid';
+
+            const errEl = document.getElementById('metaErrors');
+            errEl.innerText     = step.errors;
+            errEl.style.color   = step.hasError ? 'var(--danger)' : 'var(--success)';
+
+            // Badge
+            const badge = document.getElementById('panelBadge');
+            if (step.hasError) {
+                badge.className    = 'badge badge-danger';
+                badge.innerHTML    = '<i data-lucide="alert-triangle" style="width:11px;height:11px;"></i> Issues Found';
+            } else {
+                badge.className    = 'badge badge-success';
+                badge.innerHTML    = '<i data-lucide="check-circle" style="width:11px;height:11px;"></i> Captured';
+            }
+
+            // Retest button — visible only when there are errors
+            const retestBtn = document.getElementById('retestBtn');
+            retestBtn.style.display = step.hasError ? 'inline-flex' : 'none';
+
+            // Error detail panel
+            const panel    = document.getElementById('errorDetailPanel');
+            const listEl   = document.getElementById('errorDetailList');
+            listEl.innerHTML = '';
+
+            if (step.hasError && step.issues && step.issues.length) {
+                panel.classList.add('visible');
+                step.issues.forEach(issue => {
+                    const sevClass = SEV_CLASS[issue.severity] || 'sev-low';
+                    listEl.innerHTML += `
+                        <div class="error-item-row">
+                            <span class="error-sev-badge ${sevClass}">${issue.severity}</span>
+                            <div>
+                                <div style="font-weight:600;color:var(--text-primary);">${issue.title}</div>
+                                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.1rem;">${issue.type}</div>
+                            </div>
+                        </div>`;
+                });
+            } else {
+                panel.classList.remove('visible');
+            }
+
+            lucide.createIcons();
+        }
+    </script>
+    <script src="js/api.js"></script>
+    <script src="js/journey.js"></script>
+    <script src="js/main.js"></script>
+    <script>document.addEventListener("DOMContentLoaded", () => { lucide.createIcons(); });</script>
+</body>
+</html>

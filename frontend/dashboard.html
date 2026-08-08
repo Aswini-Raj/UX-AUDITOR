@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI UX Auditor — Live Workspace</title>
+    <meta name="description" content="Live dashboard showing real-time AI agent activity, audit progress, browser screenshots, and synthetic persona generation.">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .target-banner {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--accent-glow);
+            border: 1px solid var(--border-bright);
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1.25rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.9rem;
+        }
+
+        .target-banner svg { width: 16px; height: 16px; color: var(--accent-bright); flex-shrink: 0; }
+        .target-url { font-weight: 700; color: var(--accent-bright); font-family: 'Fira Code', monospace; }
+        .target-label { color: var(--text-muted); font-size: 0.8rem; }
+
+        .agents-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .agent-container { display: flex; flex-direction: column; gap: 0.6rem; }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .terminal-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+        }
+
+        .td-red { background: #ef4444; }
+        .td-yellow { background: #f59e0b; }
+        .td-green { background: #10b981; }
+
+        .terminal-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .screenshot-frame {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: var(--bg-elevated);
+            max-height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .screenshot-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            height: 180px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .screenshot-placeholder svg { width: 32px; height: 32px; opacity: 0.4; }
+
+        .persona-card-mini {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 0.9rem;
+            border-radius: var(--radius-md);
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+            cursor: default;
+            transition: var(--transition);
+        }
+
+        .persona-card-mini:hover { border-color: var(--border-bright); }
+
+        .audit-progress-card {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            border: 1px dashed var(--border-bright);
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, rgba(99,102,241,0.07), rgba(139,92,246,0.04));
+            margin-bottom: 1.5rem;
+        }
+
+        .audit-progress-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 0.75rem;
+            background: var(--grad-brand);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .audit-progress-icon svg { width: 22px; height: 22px; color: #fff; }
+
+        @keyframes spin-slow {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ── Splash Screen ── */
+        #splash {
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            gap: 1rem;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        #splash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .splash-ring-wrap { position: relative; width: 72px; height: 72px; }
+        .splash-ring {
+            position: absolute; inset: 0;
+            border-radius: 50%; border: 3px solid transparent;
+        }
+        .splash-ring-outer {
+            border-top-color: #6366f1; border-right-color: #8b5cf6;
+            animation: splash-spin 1s linear infinite;
+        }
+        .splash-ring-inner {
+            inset: 10px; border-top-color: #06b6d4;
+            animation: splash-spin 1.4s linear infinite reverse;
+        }
+        .splash-icon {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .splash-icon svg { width: 22px; height: 22px; color: #6366f1; }
+        .splash-brand { font-size: 1.1rem; font-weight: 800; color: #f1f5f9; letter-spacing: -0.02em; }
+        .splash-brand span { background: linear-gradient(135deg,#6366f1,#8b5cf6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .splash-tagline { font-size: 0.78rem; color: #64748b; letter-spacing: 0.06em; text-transform: uppercase; }
+        @keyframes splash-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* ── Log Entry Page Badge ── */
+        .log-page-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.68rem;
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--accent-bright);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 4px;
+            padding: 0.05rem 0.4rem;
+            margin-right: 0.35rem;
+            vertical-align: middle;
+            line-height: 1.6;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .log-page-badge.page-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .log-page-badge.page-warn {
+            background: rgba(245, 158, 11, 0.1);
+            color: #fcd34d;
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .log-entry-row {
+            display: flex;
+            align-items: baseline;
+            gap: 0.3rem;
+            line-height: 1.7;
+        }
+
+        .log-timestamp {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            flex-shrink: 0;
+            min-width: 72px;
+        }
+
+        .log-text { flex: 1; }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash">
+        <div class="splash-ring-wrap">
+            <div class="splash-ring splash-ring-outer"></div>
+            <div class="splash-ring splash-ring-inner"></div>
+            <div class="splash-icon"><i data-lucide="cpu"></i></div>
+        </div>
+        <div class="splash-brand">AI <span>UX Auditor</span></div>
+        <div class="splash-tagline">Loading Live Workspace...</div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="logo-container">AI UX Auditor</a>
+        <div class="nav-links">
+            <a href="index.html"><i data-lucide="play-circle"></i> Initialization</a>
+            <a href="dashboard.html" class="active"><i data-lucide="activity"></i> Live Workspace</a>
+            <a href="journey.html"><i data-lucide="map"></i> Journey Map</a>
+            <a href="personas.html"><i data-lucide="users"></i> Personas</a>
+            <a href="findings.html"><i data-lucide="search"></i> UX Intelligence</a>
+            <a href="fixes.html"><i data-lucide="code-2"></i> AI Code Fixes</a>
+            <a href="retest.html"><i data-lucide="refresh-cw"></i> Auto Re-Test</a>
+            <a href="reports.html"><i data-lucide="file-bar-chart"></i> Reports</a>
+            <a href="chat.html"><i data-lucide="bot"></i> UX Copilot</a>
+            <a href="login.html" class="nav-terminate"><i data-lucide="log-out"></i> Terminate</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>Orchestrator Control Tower</h2>
+            <p>Real-time view of your multi-agent AI pipeline. Monitor each agent's progress and stream logs.</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Left Column -->
+            <div>
+                <div class="card">
+                    <div class="target-banner">
+                        <i data-lucide="globe"></i>
+                        <div>
+                            <div class="target-label">Active audit target</div>
+                            <div class="target-url" id="targetUrlDisplay">—</div>
+                        </div>
+                    </div>
+
+                    <div class="agents-header">
+                        <div class="section-title" style="margin:0;flex:1;">
+                            <i data-lucide="cpu" style="width:14px;height:14px;color:var(--accent-bright);"></i>
+                            Agent Pipeline
+                        </div>
+                    </div>
+
+                    <div class="agent-container" id="agentContainer"></div>
+                </div>
+
+                <div class="card">
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <div class="terminal-dot td-red"></div>
+                            <div class="terminal-dot td-yellow"></div>
+                            <div class="terminal-dot td-green"></div>
+                        </div>
+                        <div class="terminal-title">Live Stream Logs</div>
+                        <div></div>
+                    </div>
+                    <div class="live-terminal" id="terminalLogs"><span class="log-line">Initializing log stream buffer...</span></div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+                <div class="card" id="screenshotCard" style="display: none;">
+                    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
+                        <i data-lucide="camera" style="width:16px;height:16px;color:var(--accent-bright);"></i>
+                        <h3 style="margin:0;font-size:0.95rem;">Live Site Capture</h3>
+                    </div>
+                    <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.75rem;">Screenshot captured by browser crawler:</p>
+                    <div class="screenshot-frame">
+                        <img id="liveScreenshot" src="" alt="Live site screenshot" style="width:100%;height:100%;object-fit:contain;display:block;">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
+                        <i data-lucide="users" style="width:16px;height:16px;color:var(--accent-bright);"></i>
+                        <h3 style="margin:0;font-size:0.95rem;">Synthetic Personas</h3>
+                    </div>
+                    <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.75rem;">Generated profiles assessing target environment:</p>
+                    <div class="persona-badge-grid" id="personaContainer">
+                        <div class="skeleton" style="height:52px;width:100%;"></div>
+                        <div class="skeleton" style="height:52px;width:100%;"></div>
+                    </div>
+                </div>
+
+                <div class="audit-progress-card">
+                    <div class="audit-progress-icon">
+                        <i data-lucide="cpu"></i>
+                    </div>
+                    <h3 style="font-size:1rem;margin-bottom:0.35rem;">Audit Processing</h3>
+                    <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1.25rem;">Orchestrator executing multi-agent pipelines...</p>
+                    <a id="proceedBtn" href="findings.html" class="btn btn-primary" style="display:none;width:100%;">
+                        <i data-lucide="eye" style="width:15px;height:15px;"></i>
+                        View Intelligence Layout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        // Dismiss splash on load
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const s = document.getElementById('splash');
+                if (s) s.classList.add('hidden');
+            }, 1200);
+        });
+
+        document.addEventListener("DOMContentLoaded", () => { lucide.createIcons(); });
+
+        const params = new URLSearchParams(window.location.search);
+        const taskId = params.get('task_id');
+
+        const urlDisplay = document.getElementById('targetUrlDisplay');
+        const auditUrl = localStorage.getItem('currentAuditUrl') || 'Web Environment';
+        urlDisplay.innerText = auditUrl;
+
+        // Extract the page path label from the full URL for log tagging
+        function getPageLabel(url) {
+            try {
+                const u = new URL(url.startsWith('http') ? url : 'https://' + url);
+                return u.pathname === '/' ? '/' : u.pathname;
+            } catch(e) { return url || '/'; }
+        }
+
+        const phases = [
+            { id: 'orchestrator', name: 'Orchestrator Core Routing',    icon: 'target',  desc: 'Routing agents and validating pipeline' },
+            { id: 'personas',     name: 'Persona Simulation Layer',      icon: 'users',   desc: 'Generating synthetic user test profiles' },
+            { id: 'navigation',   name: 'Browser Navigation Engine',     icon: 'globe',   desc: 'Crawling site, capturing screenshots' },
+            { id: 'intelligence', name: 'UX Intelligence Analysis',      icon: 'cpu',     desc: 'Running design checks and contrast tests' }
+        ];
+
+        const container = document.getElementById('agentContainer');
+        phases.forEach(p => {
+            container.innerHTML += `
+                <div class="agent-row" id="row-${p.id}">
+                    <div class="agent-info">
+                        <div class="agent-dot" id="dot-${p.id}"></div>
+                        <div>
+                            <div class="agent-label" style="display:flex;align-items:center;gap:0.4rem;">
+                                <i data-lucide="${p.icon}" style="width:13px;height:13px;"></i>
+                                ${p.name}
+                            </div>
+                            <div class="agent-sublabel">${p.desc}</div>
+                        </div>
+                    </div>
+                    <span id="status-${p.id}" class="agent-status-text">Queued</span>
+                </div>`;
+        });
+
+        const terminal = document.getElementById('terminalLogs');
+        const personaContainer = document.getElementById('personaContainer');
+
+        /**
+         * Append a structured log line to the terminal stream.
+         * @param {string} text       - The log message.
+         * @param {string} type       - 'info' | 'success' | 'warn' | 'error'
+         * @param {string} page       - Optional page/URL label to show as a badge
+         * @param {string} badgeClass - Optional extra class for the badge
+         */
+        function appendLog(text, type = 'info', page = '', badgeClass = '') {
+            const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            const classMap = { info: 'log-info', success: 'log-success', warn: 'log-warn', error: 'log-error' };
+            const logClass = classMap[type] || 'log-line';
+
+            const pageBadge = page
+                ? `<span class="log-page-badge ${badgeClass}">${page}</span>`
+                : '';
+
+            terminal.innerHTML += `
+<span class="${logClass} log-entry-row">
+  <span class="log-timestamp">[${time}]</span>${pageBadge}<span class="log-text">${text}</span>
+</span>`;
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        async function pollStatus() {
+            if (!taskId) {
+                terminal.innerHTML = `<span class="log-error">[ERROR] No active audit session ID found. Please start an audit from the Initialization workspace.</span>`;
+                document.getElementById('status-orchestrator').innerText = "Inactive";
+                clearInterval(intervalId);
+                return;
+            }
+            try {
+                const data = await API.getStatus(taskId);
+                const pageLabel = getPageLabel(data.url || auditUrl);
+
+                if (data.phase === "navigating" || data.phase === "analyzing" || data.phase === "completed") {
+                    const screenshotCard = document.getElementById('screenshotCard');
+                    const img = document.getElementById('liveScreenshot');
+                    if (screenshotCard && screenshotCard.style.display === "none") {
+                        img.src = `assets/screenshots/screenshot.png?t=${new Date().getTime()}`;
+                        screenshotCard.style.display = "block";
+                    }
+                }
+                if (data.phase === "initializing") {
+                    document.getElementById('dot-orchestrator').className = "agent-dot active";
+                    document.getElementById('status-orchestrator').innerText = "Preparing...";
+                    appendLog("Starting local browser automation environment.", 'info', pageLabel);
+                } else if (data.phase === "generating_personas") {
+                    document.getElementById('dot-orchestrator').className = "agent-dot done";
+                    document.getElementById('status-orchestrator').innerText = "Complete";
+                    document.getElementById('dot-personas').className = "agent-dot active";
+                    document.getElementById('status-personas').innerText = "Generating...";
+                    appendLog("Created 4 test profiles with varying accessibility needs.", 'success', pageLabel);
+                } else if (data.phase === "navigating") {
+                    document.getElementById('dot-personas').className = "agent-dot done";
+                    document.getElementById('status-personas').innerText = "Complete";
+                    document.getElementById('dot-navigation').className = "agent-dot active";
+                    document.getElementById('status-navigation').innerText = "Crawling...";
+                    appendLog("Opening headless browser and crawling target.", 'info', pageLabel);
+                    if (personaContainer.children.length <= 2 && data.personas) {
+                        personaContainer.innerHTML = '';
+                        data.personas.forEach(p => {
+                            personaContainer.innerHTML += `
+                                <div class="p-badge">
+                                    <span class="p-badge-name">${p.name}</span>
+                                    <span class="p-badge-focus">${p.focus}</span>
+                                </div>`;
+                        });
+                    }
+                } else if (data.phase === "analyzing") {
+                    document.getElementById('dot-navigation').className = "agent-dot done";
+                    document.getElementById('status-navigation').innerText = "Complete";
+                    document.getElementById('dot-intelligence').className = "agent-dot active";
+                    document.getElementById('status-intelligence').innerText = "Analyzing...";
+                    appendLog("Running design checks: contrast, viewport, inputs.", 'warn', pageLabel, 'page-warn');
+
+                    // Surface per-issue error log entries with their page origin
+                    if (data.issues && data.issues.length) {
+                        data.issues.forEach(issue => {
+                            appendLog(
+                                `[${issue.severity}] ${issue.title} — ${issue.type}`,
+                                'error',
+                                pageLabel,
+                                'page-error'
+                            );
+                        });
+                    }
+                } else if (data.phase === "completed") {
+                    document.getElementById('dot-intelligence').className = "agent-dot done";
+                    document.getElementById('status-intelligence').innerText = "Finished";
+                    appendLog("Audit pipeline completed successfully.", 'success', pageLabel);
+
+                    // Surface final issue summary in logs
+                    if (data.issues && data.issues.length) {
+                        appendLog(
+                            `${data.issues.length} issue(s) detected on ${pageLabel} — review UX Intelligence tab.`,
+                            'warn',
+                            pageLabel,
+                            'page-warn'
+                        );
+                    }
+
+                    document.getElementById('proceedBtn').style.display = "flex";
+                    lucide.createIcons();
+                    clearInterval(intervalId);
+                }
+            } catch(e) { console.error("Polling error:", e); }
+        }
+        lucide.createIcons();
+        const intervalId = setInterval(pollStatus, 1500);
+    </script>
+    <script src="js/main.js"></script>
+</body>
+</html>

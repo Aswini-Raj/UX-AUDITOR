@@ -1,0 +1,42 @@
+[
+  {
+    "id": "p1",
+    "name": "First-Time User",
+    "focus": "Struggles with dynamic onboarding setups",
+    "traits": [
+      "High intent, low friction tolerance",
+      "Confused by multi-step inputs",
+      "Expects explicit inline validation cues"
+    ]
+  },
+  {
+    "id": "p2",
+    "name": "Elderly User",
+    "focus": "Readability metrics and low-contrast elements",
+    "traits": [
+      "Needs 16px+ base typography",
+      "Dependent on high text-contrast",
+      "Requires prominent confirmation signals"
+    ]
+  },
+  {
+    "id": "p3",
+    "name": "Mobile Consumer",
+    "focus": "Viewport constraint structural rendering flaws",
+    "traits": [
+      "Strict touch-target requirements",
+      "Highly sensitive to layout shifts",
+      "Vulnerable to intrusive layouts"
+    ]
+  },
+  {
+    "id": "p4",
+    "name": "Accessibility User",
+    "focus": "Deviations from logical keyboard DOM layouts",
+    "traits": [
+      "Strict tab-navigation reliance",
+      "Depends on explicit ARIA labels",
+      "Vulnerable to focus containment traps"
+    ]
+  }
+]

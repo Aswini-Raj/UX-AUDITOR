@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI UX Auditor — AI Code Fixes</title>
+    <meta name="description" content="View AI-generated HTML and CSS code fixes for detected UX issues, with split workbench view and one-click copy.">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .split-workbench {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .recommendation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            margin-top: 0.5rem;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.3rem 0.7rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-bright);
+            background: var(--bg-elevated);
+            color: var(--accent-bright);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-family: 'Inter', sans-serif;
+            z-index: 5;
+            top: 2.5rem;
+        }
+
+        .copy-btn:hover { background: var(--accent-glow); }
+
+        .code-section-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .code-section-label:first-child { margin-top: 0; }
+        .code-section-label svg { width: 15px; height: 15px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo-container">✨ AI UX Auditor</a>
+        <div class="nav-links">
+            <a href="index.html"><i data-lucide="play-circle"></i> Initialization</a>
+            <a href="dashboard.html"><i data-lucide="activity"></i> Live Workspace</a>
+            <a href="journey.html"><i data-lucide="map"></i> Journey Map</a>
+            <a href="personas.html"><i data-lucide="users"></i> Personas</a>
+            <a href="findings.html"><i data-lucide="search"></i> UX Intelligence</a>
+            <a href="fixes.html" class="active"><i data-lucide="code-2"></i> AI Code Fixes</a>
+            <a href="retest.html"><i data-lucide="refresh-cw"></i> Auto Re-Test</a>
+            <a href="reports.html"><i data-lucide="file-bar-chart"></i> Reports</a>
+            <a href="chat.html"><i data-lucide="bot"></i> UX Copilot</a>
+            <a href="login.html" class="nav-terminate"><i data-lucide="log-out"></i> Terminate</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>🛠️ AI Design Improvement Suggestions</h2>
+            <p>Clean code patches suggested by your local AI assistant to resolve detected UX issues.</p>
+        </div>
+
+        <div class="split-workbench">
+            <div>
+                <div class="card">
+                    <h3 style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;">
+                        <i data-lucide="lightbulb" style="width:18px;height:18px;color:var(--warning);"></i>
+                        Recommendations
+                    </h3>
+                    <div class="recommendation-list" id="recList">
+                        <div class="skeleton" style="height:70px;border-radius:var(--radius-md);"></div>
+                        <div class="skeleton" style="height:70px;border-radius:var(--radius-md);"></div>
+                        <div class="skeleton" style="height:70px;border-radius:var(--radius-md);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <h3 style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;">
+                        <i data-lucide="terminal" style="width:18px;height:18px;color:var(--accent-bright);"></i>
+                        Suggested Code Fixes
+                    </h3>
+
+                    <div class="code-section-label">
+                        <i data-lucide="code"></i> HTML Fix
+                    </div>
+                    <div class="code-block" style="position:relative;">
+                        <div class="code-label">HTML</div>
+                        <button class="copy-btn" onclick="copyCode('htmlFixCode', this)">
+                            <i data-lucide="copy" style="width:11px;height:11px;"></i> Copy
+                        </button>
+                        <pre id="htmlFixCode" style="margin-top:0.5rem;"></pre>
+                    </div>
+
+                    <div class="code-section-label">
+                        <i data-lucide="palette"></i> CSS Fix
+                    </div>
+                    <div class="code-block" style="position:relative;">
+                        <div class="code-label">CSS</div>
+                        <button class="copy-btn" onclick="copyCode('cssFixCode', this)">
+                            <i data-lucide="copy" style="width:11px;height:11px;"></i> Copy
+                        </button>
+                        <pre id="cssFixCode">/* Populated dynamically */</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyCode(id, btn) {
+            const text = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                btn.innerHTML = '<i data-lucide="check" style="width:11px;height:11px;"></i> Copied!';
+                btn.style.color = 'var(--success)';
+                lucide.createIcons();
+                setTimeout(() => {
+                    btn.innerHTML = '<i data-lucide="copy" style="width:11px;height:11px;"></i> Copy';
+                    btn.style.color = '';
+                    lucide.createIcons();
+                }, 2000);
+            });
+        }
+    </script>
+    <script src="js/api.js"></script>
+    <script src="js/fixes.js"></script>
+    <script src="js/main.js"></script>
+    <script>document.addEventListener("DOMContentLoaded", () => { lucide.createIcons(); });</script>
+</body>
+</html>

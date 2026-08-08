@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — UX Auditor</title>
+    <meta name="description" content="Sign in to your UX Auditor account to start scanning websites for accessibility and usability issues.">
+    <link rel="stylesheet" href="css/theme.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        /* ── Splash Screen ── */
+        #splash {
+            position: fixed;
+            inset: 0;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            gap: 1rem;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        #splash.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .splash-ring-wrap {
+            position: relative;
+            width: 72px;
+            height: 72px;
+        }
+
+        .splash-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 3px solid transparent;
+        }
+
+        .splash-ring-outer {
+            border-top-color: #4f46e5;
+            border-right-color: #7c3aed;
+            animation: splash-spin 1s linear infinite;
+        }
+
+        .splash-ring-inner {
+            inset: 10px;
+            border-top-color: #06b6d4;
+            animation: splash-spin 1.4s linear infinite reverse;
+        }
+
+        .splash-icon {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+        }
+
+        .splash-brand {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+
+        .splash-brand span {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .splash-tagline {
+            font-size: 0.78rem;
+            color: #94a3b8;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        @keyframes splash-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .page-wrapper {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        /* ── Logo ── */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(79,70,229,0.3);
+        }
+
+        .logo-name {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+
+        /* ── Card ── */
+        .auth-card {
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.04);
+        }
+
+        /* ── Tabs ── */
+        .tabs {
+            display: flex;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 3px;
+            margin-bottom: 1.75rem;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 0.55rem;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-size: 0.88rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .tab.active {
+            background: #ffffff;
+            color: #4f46e5;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        /* ── Header text ── */
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.3rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.88rem;
+            color: #64748b;
+            margin-bottom: 1.5rem;
+        }
+
+        /* ── Form Fields ── */
+        .field {
+            margin-bottom: 1rem;
+        }
+
+        .field label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.4rem;
+        }
+
+        .field-input-wrap {
+            position: relative;
+        }
+
+        .field-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            width: 16px;
+            height: 16px;
+            pointer-events: none;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 0.7rem 0.9rem 0.7rem 2.5rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            color: #0f172a;
+            background: #ffffff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+
+        .field input::placeholder { color: #94a3b8; }
+
+        .field input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+        }
+
+        /* ── Forgot link ── */
+        .forgot-link {
+            display: block;
+            text-align: right;
+            font-size: 0.8rem;
+            color: #4f46e5;
+            text-decoration: none;
+            margin-top: -0.5rem;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .forgot-link:hover { text-decoration: underline; }
+
+        /* ── Button ── */
+        .btn-submit {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(79,70,229,0.3);
+            margin-top: 0.5rem;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(79,70,229,0.38);
+        }
+
+        .btn-submit:active { transform: translateY(0); }
+
+        .btn-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ── Divider ── */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 1.25rem 0;
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        /* ── Demo badge ── */
+        .demo-note {
+            background: #fefce8;
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            padding: 0.6rem 0.85rem;
+            font-size: 0.8rem;
+            color: #92400e;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .demo-note svg { flex-shrink: 0; margin-top: 1px; }
+
+        /* ── Footer text ── */
+        .auth-footer {
+            font-size: 0.82rem;
+            color: #64748b;
+            text-align: center;
+        }
+
+        .auth-footer span { color: #4f46e5; font-weight: 600; cursor: pointer; }
+        .auth-footer span:hover { text-decoration: underline; }
+
+        /* ── Error message ── */
+        .error-msg {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 0.6rem 0.85rem;
+            font-size: 0.82rem;
+            color: #dc2626;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        /* ── Spin animation ── */
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .page-wrapper { animation: fadeIn 0.4s ease; }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash">
+        <div class="splash-ring-wrap">
+            <div class="splash-ring splash-ring-outer"></div>
+            <div class="splash-ring splash-ring-inner"></div>
+            <div class="splash-icon">✨</div>
+        </div>
+        <div class="splash-brand">AI <span>UX Auditor</span></div>
+        <div class="splash-tagline">Initializing Platform...</div>
+    </div>
+
+    <div class="page-wrapper">
+
+        <!-- Logo -->
+        <a href="#" class="logo">
+            <div class="logo-icon">✨</div>
+            <span class="logo-name">UX Auditor</span>
+        </a>
+
+        <!-- Auth Card -->
+        <div class="auth-card">
+
+            <!-- Sign In / Register Tabs -->
+            <div class="tabs">
+                <button class="tab active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+                <button class="tab" id="tab-register" onclick="switchTab('register')">Create Account</button>
+            </div>
+
+            <!-- Dynamic Header -->
+            <div id="cardHeader">
+                <p class="card-title">Welcome back</p>
+                <p class="card-subtitle">Sign in to your UX Auditor account</p>
+            </div>
+
+            <!-- Error Box -->
+            <div class="error-msg" id="errorMsg"></div>
+
+            <!-- Form -->
+            <form id="authForm" onsubmit="handleSubmit(event)">
+
+                <!-- Name (Register only) -->
+                <div class="field" id="nameField" style="display:none;">
+                    <label for="inputName">Full Name</label>
+                    <div class="field-input-wrap">
+                        <svg class="field-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <input type="text" id="inputName" placeholder="Jane Smith" autocomplete="name">
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="field">
+                    <label for="inputEmail">Email address</label>
+                    <div class="field-input-wrap">
+                        <svg class="field-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                        <input type="email" id="inputEmail" placeholder="you@example.com" value="aswi@gmail.com" required autocomplete="email">
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="field">
+                    <label for="inputPassword">Password</label>
+                    <div class="field-input-wrap">
+                        <svg class="field-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <input type="password" id="inputPassword" placeholder="••••••••" value="12345678" required autocomplete="current-password">
+                    </div>
+                </div>
+
+                <!-- Forgot (Login only) -->
+                <a href="#" class="forgot-link" id="forgotLink">Forgot password?</a>
+
+                <!-- Confirm Password (Register only) -->
+                <div class="field" id="confirmField" style="display:none;">
+                    <label for="inputConfirm">Confirm Password</label>
+                    <div class="field-input-wrap">
+                        <svg class="field-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <input type="password" id="inputConfirm" placeholder="••••••••" autocomplete="new-password">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <svg id="btnIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+                    <span id="btnText">Sign In</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <p class="auth-footer" id="authFooter">
+            Don't have an account? <span onclick="switchTab('register')">Create one for free</span>
+        </p>
+
+    </div>
+
+    <script>
+        // Hide splash screen on load
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splash');
+                if (splash) {
+                    splash.classList.add('hidden');
+                }
+            }, 1200); // 1.2s delay for a premium feel
+        });
+
+        let currentTab = 'login';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            const isLogin = tab === 'login';
+
+            // Tab buttons
+            document.getElementById('tab-login').classList.toggle('active', isLogin);
+            document.getElementById('tab-register').classList.toggle('active', !isLogin);
+
+            // Header
+            document.getElementById('cardHeader').innerHTML = isLogin
+                ? '<p class="card-title">Welcome back</p><p class="card-subtitle">Sign in to your UX Auditor account</p>'
+                : '<p class="card-title">Create your account</p><p class="card-subtitle">Get started — it\'s free</p>';
+
+            // Show/hide fields
+            document.getElementById('nameField').style.display = isLogin ? 'none' : 'block';
+            document.getElementById('confirmField').style.display = isLogin ? 'none' : 'block';
+            document.getElementById('forgotLink').style.display = isLogin ? 'block' : 'none';
+
+            // Required attrs
+            document.getElementById('inputName').required = !isLogin;
+            document.getElementById('inputConfirm').required = !isLogin;
+
+            // Button
+            document.getElementById('btnText').textContent = isLogin ? 'Sign In' : 'Create Account';
+
+            // Footer
+            document.getElementById('authFooter').innerHTML = isLogin
+                ? 'Don\'t have an account? <span onclick="switchTab(\'register\')">Create one for free</span>'
+                : 'Already have an account? <span onclick="switchTab(\'login\')">Sign in</span>';
+
+            // Clear errors
+            hideError();
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            hideError();
+
+            const btn = document.getElementById('submitBtn');
+            const btnIcon = document.getElementById('btnIcon');
+            const btnText = document.getElementById('btnText');
+
+            const email = document.getElementById('inputEmail').value.trim();
+            const password = document.getElementById('inputPassword').value;
+
+            if (currentTab === 'register') {
+                const name = document.getElementById('inputName').value.trim();
+                const confirm = document.getElementById('inputConfirm').value;
+
+                if (!name) { showError('Please enter your full name.'); return; }
+                if (password.length < 6) { showError('Password must be at least 6 characters.'); return; }
+                if (password !== confirm) { showError('Passwords do not match. Please try again.'); return; }
+
+                btnText.textContent = 'Creating Account...';
+                btnIcon.style.animation = 'spin 1s linear infinite';
+                btn.disabled = true;
+
+                try {
+                    const response = await fetch('http://localhost:8000/api/auth/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, email, password })
+                    });
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.detail || 'Registration failed.');
+                    }
+                    
+                    btn.disabled = false;
+                    btnIcon.style.animation = '';
+                    switchTab('login');
+                    document.getElementById('cardHeader').innerHTML =
+                        '<p class="card-title">Account created! 🎉</p><p class="card-subtitle">Sign in with your new credentials</p>';
+                } catch (err) {
+                    showError(err.message);
+                    btn.disabled = false;
+                    btnIcon.style.animation = '';
+                    btnText.textContent = 'Create Account';
+                }
+
+            } else {
+                btnText.textContent = 'Signing in...';
+                btnIcon.style.animation = 'spin 1s linear infinite';
+                btn.disabled = true;
+
+                try {
+                    const response = await fetch('http://localhost:8000/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.detail || 'Invalid credentials.');
+                    }
+                    
+                    // Save user info in localStorage
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 500);
+                } catch (err) {
+                    showError(err.message);
+                    btn.disabled = false;
+                    btnIcon.style.animation = '';
+                    btnText.textContent = 'Sign In';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

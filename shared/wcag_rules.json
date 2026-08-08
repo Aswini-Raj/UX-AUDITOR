@@ -1,0 +1,23 @@
+{
+  "ruleset_version": "WCAG_2.1_AA",
+  "criteria": [
+    {
+      "id": "1.4.3",
+      "name": "Contrast (Minimum)",
+      "requirement": "Visual presentation of text must maintain a contrast ratio of at least 4.5:1, except for large text layouts.",
+      "default_severity": "High"
+    },
+    {
+      "id": "2.1.1",
+      "name": "Keyboard Accessible Navigation",
+      "requirement": "All functionality of the interface content must be operable through a standard keyboard interaction interface without trapping focus.",
+      "default_severity": "Critical"
+    },
+    {
+      "id": "4.1.2",
+      "name": "Name, Role, Value Attributes",
+      "requirement": "For all user interface components, the name and role parameters must be explicitly exposed to accessibility assistive agents.",
+      "default_severity": "Medium"
+    }
+  ]
+}

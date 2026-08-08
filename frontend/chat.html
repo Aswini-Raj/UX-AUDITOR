@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI UX Auditor — UX Copilot</title>
+    <meta name="description" content="Chat with your AI UX Copilot. Ask questions about audit findings, design contrast, accessibility, and get instant AI-powered design guidance.">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .chat-layout {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        .chat-frame {
+            display: flex;
+            flex-direction: column;
+            height: 580px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.1rem 1.5rem;
+            background: var(--bg-elevated);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .chat-avatar {
+            width: 38px; height: 38px;
+            border-radius: 12px;
+            background: var(--grad-brand);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(99,102,241,0.4);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .chat-info { flex: 1; }
+        .chat-name { font-weight: 700; font-size: 0.95rem; }
+        .chat-status { font-size: 0.75rem; color: var(--success); display: flex; align-items: center; gap: 0.35rem; }
+        .chat-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: pulse-success 1.5s infinite; }
+
+        .chat-body {
+            flex: 1;
+            padding: 1.25rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            background: var(--bg-primary);
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.85rem 1.1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            line-height: 1.55;
+            animation: fadeInUp 0.2s ease;
+        }
+
+        .message.system {
+            background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1));
+            color: var(--text-primary);
+            align-self: flex-start;
+            border-bottom-left-radius: var(--radius-xs);
+            border: 1px solid var(--border-bright);
+        }
+
+        .message.user {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            align-self: flex-end;
+            border-bottom-right-radius: var(--radius-xs);
+            border: 1px solid var(--border-color);
+        }
+
+        .message-meta {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            border-bottom-left-radius: var(--radius-xs);
+            padding: 0.85rem 1.1rem;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 0.3rem;
+            align-items: center;
+        }
+
+        .typing-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--text-muted);
+        }
+
+        .typing-dot:nth-child(1) { animation: bounce 1.2s 0s infinite; }
+        .typing-dot:nth-child(2) { animation: bounce 1.2s 0.2s infinite; }
+        .typing-dot:nth-child(3) { animation: bounce 1.2s 0.4s infinite; }
+
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); background: var(--accent-bright); }
+        }
+
+        .chat-footer {
+            padding: 1rem 1.25rem;
+            background: var(--bg-elevated);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            resize: none;
+            transition: var(--transition);
+            height: 44px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .chat-input::placeholder { color: var(--text-muted); }
+        .chat-input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+        .quick-prompts {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            padding: 0.75rem 1.25rem 0;
+        }
+
+        .quick-chip {
+            padding: 0.3rem 0.75rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .quick-chip:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-bright);
+            background: var(--accent-glow);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo-container">✨ AI UX Auditor</a>
+        <div class="nav-links">
+            <a href="index.html"><i data-lucide="play-circle"></i> Initialization</a>
+            <a href="dashboard.html"><i data-lucide="activity"></i> Live Workspace</a>
+            <a href="journey.html"><i data-lucide="map"></i> Journey Map</a>
+            <a href="personas.html"><i data-lucide="users"></i> Personas</a>
+            <a href="findings.html"><i data-lucide="search"></i> UX Intelligence</a>
+            <a href="fixes.html"><i data-lucide="code-2"></i> AI Code Fixes</a>
+            <a href="retest.html"><i data-lucide="refresh-cw"></i> Auto Re-Test</a>
+            <a href="reports.html"><i data-lucide="file-bar-chart"></i> Reports</a>
+            <a href="chat.html" class="active"><i data-lucide="bot"></i> UX Copilot</a>
+            <a href="login.html" class="nav-terminate"><i data-lucide="log-out"></i> Terminate</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header" style="text-align:center;">
+            <h2>🤖 UX Copilot — AI Design Assistant</h2>
+            <p>Ask anything about your audit findings, design improvements, accessibility, or layout guidance.</p>
+        </div>
+
+        <div class="chat-layout">
+            <div class="chat-frame">
+                <div class="chat-header">
+                    <div class="chat-avatar">🤖</div>
+                    <div class="chat-info">
+                        <div class="chat-name">UX Copilot</div>
+                        <div class="chat-status">
+                            <div class="chat-status-dot"></div>
+                            Online — AI-powered design intelligence
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" style="font-size:0.78rem;padding:0.35rem 0.75rem;" onclick="clearChat()">
+                        <i data-lucide="trash-2" style="width:13px;height:13px;"></i> Clear
+                    </button>
+                </div>
+
+                <div class="quick-prompts" id="quickPrompts">
+                    <span class="quick-chip" onclick="injectPrompt('Why is the checkout button critical?')">Why is checkout critical?</span>
+                    <span class="quick-chip" onclick="injectPrompt('What are the top 3 accessibility issues?')">Top accessibility issues</span>
+                    <span class="quick-chip" onclick="injectPrompt('How can I improve the login form?')">Improve login form</span>
+                    <span class="quick-chip" onclick="injectPrompt('Explain the contrast failures')">Contrast failures</span>
+                </div>
+
+                <div class="chat-body" id="chatBody">
+                    <div class="message system">
+                        👋 Hi! I'm your AI Design Copilot. Ask me anything about the recent audit findings — design contrast, accessibility issues, friction points, or how to improve specific UI elements!
+                        <div class="message-meta">UX Copilot · just now</div>
+                    </div>
+                </div>
+
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+
+                <div class="chat-footer">
+                    <input type="text" id="userInput" class="chat-input"
+                        placeholder="e.g., 'Why is the checkout button issue marked as critical?'"
+                        onkeypress="if(event.key === 'Enter') sendMessage()">
+                    <button class="btn btn-primary" onclick="sendMessage()" style="padding:0.7rem 1rem;flex-shrink:0;">
+                        <i data-lucide="send" style="width:16px;height:16px;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getTime() {
+            return new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const body = document.getElementById('chatBody');
+            body.innerHTML += `<div class="message user">${text}<div class="message-meta">You · ${getTime()}</div></div>`;
+            input.value = '';
+            body.scrollTop = body.scrollHeight;
+
+            // Hide quick prompts after first message
+            document.getElementById('quickPrompts').style.display = 'none';
+
+            // Show typing
+            const typing = document.getElementById('typingIndicator');
+            typing.style.display = 'block';
+            body.scrollTop = body.scrollHeight;
+
+            setTimeout(() => {
+                typing.style.display = 'none';
+                const reply = processConversationalTrafficStream(text);
+                body.innerHTML += `<div class="message system">${reply}<div class="message-meta">UX Copilot · ${getTime()}</div></div>`;
+                body.scrollTop = body.scrollHeight;
+            }, 900 + Math.random() * 600);
+        }
+
+        function injectPrompt(text) {
+            document.getElementById('userInput').value = text;
+            sendMessage();
+        }
+
+        function clearChat() {
+            document.getElementById('chatBody').innerHTML = `
+                <div class="message system">
+                    Chat cleared. Ready for new questions about your UX audit!
+                    <div class="message-meta">UX Copilot · ${getTime()}</div>
+                </div>`;
+            document.getElementById('quickPrompts').style.display = 'flex';
+        }
+    </script>
+    <script src="js/api.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/main.js"></script>
+    <script>document.addEventListener("DOMContentLoaded", () => { lucide.createIcons(); });</script>
+</body>
+</html>

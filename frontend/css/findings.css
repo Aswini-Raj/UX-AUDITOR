@@ -1,0 +1,6 @@
+/* Findings-specific overrides */
+.findings-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+
+@media (max-width: 768px) {
+    .score-metrics-row { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap');
+
+:root {
+    /* ── Background System ── */
+    --bg-primary: #f8fafc;
+    --bg-secondary: #f1f5f9;
+    --bg-card: #ffffff;
+    --bg-elevated: #f8fafc;
+    --bg-hover: #e2e8f0;
+
+    /* ── Border ── */
+    --border-color: rgba(99, 102, 241, 0.08);
+    --border-bright: rgba(99, 102, 241, 0.18);
+    --border-glow: rgba(99, 102, 241, 0.3);
+
+    /* ── Text ── */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --text-accent: #4f46e5;
+
+    /* ── Accent / Brand ── */
+    --accent-color: #4f46e5;
+    --accent-hover: #4338ca;
+    --accent-bright: #6366f1;
+    --accent-glow: rgba(99, 102, 241, 0.06);
+    --accent-glow-bright: rgba(99, 102, 241, 0.12);
+
+    /* ── Gradient Palette ── */
+    --grad-brand: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #0891b2 100%);
+    --grad-hero: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f8fafc 100%);
+    --grad-card: linear-gradient(135deg, rgba(99,102,241,0.03) 0%, rgba(139,92,246,0.01) 100%);
+    --grad-danger: linear-gradient(135deg, #ef4444, #f97316);
+    --grad-success: linear-gradient(135deg, #10b981, #06b6d4);
+    --grad-warning: linear-gradient(135deg, #f59e0b, #fbbf24);
+
+    /* ── Semantic Colors ── */
+    --success: #10b981;
+    --success-glow: rgba(16, 185, 129, 0.1);
+    --warning: #f59e0b;
+    --warning-glow: rgba(245, 158, 11, 0.1);
+    --danger: #ef4444;
+    --danger-glow: rgba(239, 68, 68, 0.1);
+    --info: #06b6d4;
+    --info-glow: rgba(6, 182, 212, 0.1);
+    --purple: #8b5cf6;
+    --purple-glow: rgba(139, 92, 246, 0.1);
+
+    /* ── Radius ── */
+    --radius-xs: 4px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+
+    /* ── Shadows ── */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.06);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+    --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.08), 0 0 40px rgba(99, 102, 241, 0.03);
+    --shadow-glow-sm: 0 0 10px rgba(99, 102, 241, 0.08);
+
+    /* ── Motion ── */
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}

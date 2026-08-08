@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI UX Auditor — Initialization</title>
+    <meta name="description" content="Start a new AI-powered UX audit. Enter your target URL and select an audit goal to begin browser crawling and analysis.">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* ── Hero ── */
+        .hero-section {
+            text-align: center;
+            padding: 3.5rem 2rem 2.5rem;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--accent-glow-bright);
+            border: 1px solid var(--border-bright);
+            color: var(--accent-bright);
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0.4rem 1rem;
+            border-radius: var(--radius-full);
+            margin-bottom: 1.25rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: -0.05em;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title .highlight {
+            background: var(--grad-brand);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-desc {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            max-width: 520px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* ── Stats Row ── */
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-val {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            background: var(--grad-brand);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 0.15rem;
+        }
+
+        /* ── Form Card ── */
+        .audit-card {
+            max-width: 780px;
+            margin: 0 auto;
+        }
+
+        .audit-card .card {
+            border-color: var(--border-bright);
+            box-shadow: var(--shadow-glow), var(--shadow-lg);
+        }
+
+        /* ── URL Input ── */
+        .url-input-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .url-prefix {
+            position: absolute;
+            left: 1rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .url-prefix svg { width: 15px; height: 15px; }
+
+        #targetUrl {
+            padding-left: 3rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+        }
+
+        /* ── Option Cards ── */
+        .grid-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.85rem;
+            margin-top: 0.75rem;
+        }
+
+        .option-card {
+            border: 1.5px solid #e2e8f0;
+            padding: 1.1rem 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            min-width: 0;
+        }
+
+        .option-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79,70,229,0.1);
+        }
+
+        .option-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0; height: 0;
+        }
+
+        .option-card .option-icon {
+            font-size: 1.5rem;
+            display: block;
+            line-height: 1;
+        }
+
+        .option-card h4 {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .option-card p {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .option-card.selected {
+            border-color: var(--accent-color);
+            background: linear-gradient(135deg, rgba(79,70,229,0.04), rgba(124,58,237,0.02));
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.08);
+        }
+
+        .option-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 0.6rem;
+            right: 0.6rem;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 18px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .grid-options { grid-template-columns: 1fr; }
+        }
+
+        /* ── Submit Button ── */
+        .submit-btn-wrap {
+            position: relative;
+            margin-top: 1.5rem;
+        }
+
+        #submitBtn {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+        }
+
+        .submit-hint {
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo-container">✨ AI UX Auditor</a>
+        <div class="nav-links">
+            <a href="index.html" class="active"><i data-lucide="play-circle"></i> Initialization</a>
+            <a href="dashboard.html"><i data-lucide="activity"></i> Live Workspace</a>
+            <a href="journey.html"><i data-lucide="map"></i> Journey Map</a>
+            <a href="personas.html"><i data-lucide="users"></i> Personas</a>
+            <a href="findings.html"><i data-lucide="search"></i> UX Intelligence</a>
+            <a href="fixes.html"><i data-lucide="code-2"></i> AI Code Fixes</a>
+            <a href="retest.html"><i data-lucide="refresh-cw"></i> Auto Re-Test</a>
+            <a href="reports.html"><i data-lucide="file-bar-chart"></i> Reports</a>
+            <a href="chat.html"><i data-lucide="bot"></i> UX Copilot</a>
+            <a href="login.html" class="nav-terminate"><i data-lucide="log-out"></i> Terminate</a>
+        </div>
+    </nav>
+
+    <div class="hero-section">
+        <div class="hero-badge">
+            <i data-lucide="sparkles" style="width:12px;height:12px;"></i>
+            Instant Website Audit Tool
+        </div>
+        <h1 class="hero-title">
+            Check Your Website's <span class="highlight">User Experience</span><br>Instantly
+        </h1>
+        <p class="hero-desc">Enter your website address below. Our checker will scan your page for accessibility issues, readability, and checkout problems in seconds.</p>
+
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="stat-val">4</div>
+                <div class="stat-label">Auditing Tools</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-val">50+</div>
+                <div class="stat-label">Design Checks</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-val">4</div>
+                <div class="stat-label">Detailed Reports</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-val">WCAG</div>
+                <div class="stat-label">Accessibility Standard</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="audit-card">
+            <div class="card card-accent">
+                <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;">
+                    <div style="width:36px;height:36px;border-radius:10px;background:var(--grad-brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(99,102,241,0.25);">
+                        <i data-lucide="settings-2" style="width:18px;height:18px;color:white;"></i>
+                    </div>
+                    <div>
+                        <h2 style="font-size:1.15rem;margin:0;">Setup Your Scan</h2>
+                        <p style="font-size:0.82rem;color:var(--text-secondary);margin:0;">Enter your website link and select what you want to check</p>
+                    </div>
+                </div>
+
+                <form id="auditForm">
+                    <div class="form-group">
+                        <label><i data-lucide="globe" style="width:13px;height:13px;"></i> Enter Website Address (URL)</label>
+                        <div class="url-input-wrap">
+                            <span class="url-prefix"><i data-lucide="link"></i></span>
+                            <input type="url" id="targetUrl" class="form-control" placeholder="https://example.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i data-lucide="target" style="width:13px;height:13px;"></i> What do you want to test?</label>
+                        <div class="grid-options">
+                            <label class="option-card selected">
+                                <input type="radio" name="goal" value="signup" checked>
+                                <span class="option-icon">🚀</span>
+                                <h4>Sign-Up Flow</h4>
+                                <p>Checks for issues when creating a new account (e.g. form fields, descriptive labels, and button layout).</p>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="goal" value="login">
+                                <span class="option-icon">🔐</span>
+                                <h4>Login Screen</h4>
+                                <p>Scans the sign-in form for readability, clear inputs, and helpful error indications.</p>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="goal" value="checkout">
+                                <span class="option-icon">🛒</span>
+                                <h4>Checkout & Cart</h4>
+                                <p>Analyzes the purchase page for visual clarity, button placement, and ordering hurdles.</p>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="submit-btn-wrap">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i data-lucide="play" style="width:16px;height:16px;"></i>
+                            Start Free Website Scan
+                        </button>
+                        <div class="submit-hint">
+                            <i data-lucide="shield-check" style="width:12px;height:12px;"></i>
+                            Fully secure scan — runs locally on your computer
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => { lucide.createIcons(); });
+
+        document.querySelectorAll('.option-card input').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+                if (e.target.checked) e.target.closest('.option-card').classList.add('selected');
+            });
+        });
+
+        document.querySelectorAll('.option-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const radio = this.querySelector('input[type="radio"]');
+                if (radio) {
+                    radio.checked = true;
+                    document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                }
+            });
+        });
+
+        document.getElementById('auditForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = '<i data-lucide="loader-2" style="width:16px;height:16px;animation:spin 1s linear infinite;"></i> Launching...';
+            btn.disabled = true;
+            lucide.createIcons();
+
+            const payload = {
+                url: document.getElementById('targetUrl').value,
+                goal: document.querySelector('input[name="goal"]:checked').value
+            };
+
+            localStorage.setItem('currentAuditUrl', payload.url);
+            localStorage.setItem('currentAuditGoal', payload.goal);
+
+            try {
+                const res = await fetch('http://127.0.0.1:8000/api/audit/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                window.location.href = `dashboard.html?task_id=${data.task_id}`;
+            } catch(err) {
+                btn.innerHTML = '<i data-lucide="cpu" style="width:16px;height:16px;"></i> Initialize Orchestrator Agent';
+                btn.disabled = false;
+                lucide.createIcons();
+                alert('Could not connect to backend. Make sure the server is running.');
+            }
+        });
+    </script>
+    <script src="js/api.js"></script>
+    <script src="js/audit.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI UX Auditor — Example Users</title>
+    <meta name="description" content="View AI-generated example users used to simulate diverse user behaviors and accessibility needs during audits.">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .persona-matrix {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .persona-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            background: var(--bg-card);
+            transition: var(--transition-bounce);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .persona-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--persona-color, var(--grad-brand));
+        }
+
+        .persona-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--border-bright);
+        }
+
+        .p-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.85rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .p-avatar {
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .p-name { font-weight: 800; font-size: 1.25rem; margin-bottom: 0.2rem; }
+        .p-role { font-size: 1rem; color: var(--text-secondary); }
+
+        .p-focus-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: var(--accent-glow);
+            border: 1px solid var(--border-bright);
+            color: var(--accent-bright);
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 0.25rem 0.65rem;
+            border-radius: var(--radius-full);
+            margin-bottom: 0.85rem;
+        }
+
+        .trait-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .trait-list li {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .trait-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            flex-shrink: 0;
+            margin-top: 6px;
+        }
+
+        .skeleton-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            background: var(--bg-card);
+        }
+
+        /* ── Splash Screen ── */
+        #splash {
+            position: fixed; inset: 0; background: #0f172a;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; gap: 1rem;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        #splash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .splash-ring-wrap { position: relative; width: 72px; height: 72px; }
+        .splash-ring { position: absolute; inset: 0; border-radius: 50%; border: 3px solid transparent; }
+        .splash-ring-outer { border-top-color: #6366f1; border-right-color: #8b5cf6; animation: splash-spin 1s linear infinite; }
+        .splash-ring-inner { inset: 10px; border-top-color: #06b6d4; animation: splash-spin 1.4s linear infinite reverse; }
+        .splash-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; }
+        .splash-brand { font-size: 1.5rem; font-weight: 800; color: #f1f5f9; letter-spacing: -0.02em; }
+        .splash-brand span { background: linear-gradient(135deg,#6366f1,#8b5cf6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .splash-tagline { font-size: 1rem; color: #64748b; letter-spacing: 0.06em; text-transform: uppercase; }
+        @keyframes splash-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash">
+        <div class="splash-ring-wrap">
+            <div class="splash-ring splash-ring-outer"></div>
+            <div class="splash-ring splash-ring-inner"></div>
+            <div class="splash-icon">👥</div>
+        </div>
+        <div class="splash-brand">AI <span>UX Auditor</span></div>
+        <div class="splash-tagline">Creating Users...</div>
+    </div>
+    <nav class="navbar">
+        <a href="index.html" class="logo-container">✨ AI UX Auditor</a>
+        <div class="nav-links">
+            <a href="index.html"><i data-lucide="play-circle"></i> Initialization</a>
+            <a href="dashboard.html"><i data-lucide="activity"></i> Live Workspace</a>
+            <a href="journey.html"><i data-lucide="map"></i> Journey Map</a>
+            <a href="personas.html" class="active"><i data-lucide="users"></i> Personas</a>
+            <a href="findings.html"><i data-lucide="search"></i> UX Intelligence</a>
+            <a href="fixes.html"><i data-lucide="code-2"></i> AI Code Fixes</a>
+            <a href="retest.html"><i data-lucide="refresh-cw"></i> Auto Re-Test</a>
+            <a href="reports.html"><i data-lucide="file-bar-chart"></i> Reports</a>
+            <a href="chat.html"><i data-lucide="bot"></i> UX Copilot</a>
+            <a href="login.html" class="nav-terminate"><i data-lucide="log-out"></i> Terminate</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>👥 Example Users</h2>
+            <p>Profiles created by AI to test how easy the website is to use for different people.</p>
+        </div>
+
+        <div class="persona-matrix" id="personaMatrix">
+            <div class="skeleton-card">
+                <div class="skeleton" style="width:52px;height:52px;border-radius:14px;margin-bottom:1rem;"></div>
+                <div class="skeleton" style="width:60%;height:16px;margin-bottom:0.5rem;"></div>
+                <div class="skeleton" style="width:40%;height:12px;margin-bottom:1rem;"></div>
+                <div class="skeleton" style="width:100%;height:12px;margin-bottom:0.4rem;"></div>
+                <div class="skeleton" style="width:80%;height:12px;margin-bottom:0.4rem;"></div>
+                <div class="skeleton" style="width:90%;height:12px;"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton" style="width:52px;height:52px;border-radius:14px;margin-bottom:1rem;"></div>
+                <div class="skeleton" style="width:55%;height:16px;margin-bottom:0.5rem;"></div>
+                <div class="skeleton" style="width:45%;height:12px;margin-bottom:1rem;"></div>
+                <div class="skeleton" style="width:100%;height:12px;margin-bottom:0.4rem;"></div>
+                <div class="skeleton" style="width:75%;height:12px;margin-bottom:0.4rem;"></div>
+                <div class="skeleton" style="width:85%;height:12px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/personas.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const s = document.getElementById('splash');
+                if (s) s.classList.add('hidden');
+            }, 1200);
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

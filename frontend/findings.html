@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI UX Auditor — UX Intelligence Findings</title>
+    <meta name="description" content="View AI-generated UX findings, design health scores, accessibility issues, and friction events captured by the audit pipeline.">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .score-metrics-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.4rem 0.9rem;
+            border-radius: var(--radius-full);
+            border: 1px solid var(--border-color);
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .filter-btn:hover { border-color: var(--border-bright); color: var(--text-primary); }
+        .filter-btn.active { background: var(--grad-brand); color: white; border-color: transparent; box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+        /* ── Splash Screen ── */
+        #splash {
+            position: fixed; inset: 0; background: #0f172a;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; gap: 1rem;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        #splash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .splash-ring-wrap { position: relative; width: 72px; height: 72px; }
+        .splash-ring { position: absolute; inset: 0; border-radius: 50%; border: 3px solid transparent; }
+        .splash-ring-outer { border-top-color: #6366f1; border-right-color: #8b5cf6; animation: splash-spin 1s linear infinite; }
+        .splash-ring-inner { inset: 10px; border-top-color: #06b6d4; animation: splash-spin 1.4s linear infinite reverse; }
+        .splash-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; }
+        .splash-brand { font-size: 1.1rem; font-weight: 800; color: #f1f5f9; letter-spacing: -0.02em; }
+        .splash-brand span { background: linear-gradient(135deg,#6366f1,#8b5cf6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .splash-tagline { font-size: 0.78rem; color: #64748b; letter-spacing: 0.06em; text-transform: uppercase; }
+        @keyframes splash-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash">
+        <div class="splash-ring-wrap">
+            <div class="splash-ring splash-ring-outer"></div>
+            <div class="splash-ring splash-ring-inner"></div>
+            <div class="splash-icon">🔍</div>
+        </div>
+        <div class="splash-brand">AI <span>UX Auditor</span></div>
+        <div class="splash-tagline">Loading UX Intelligence...</div>
+    </div>
+    <nav class="navbar">
+        <a href="index.html" class="logo-container">✨ AI UX Auditor</a>
+        <div class="nav-links">
+            <a href="index.html"><i data-lucide="play-circle"></i> Initialization</a>
+            <a href="dashboard.html"><i data-lucide="activity"></i> Live Workspace</a>
+            <a href="journey.html"><i data-lucide="map"></i> Journey Map</a>
+            <a href="personas.html"><i data-lucide="users"></i> Personas</a>
+            <a href="findings.html" class="active"><i data-lucide="search"></i> UX Intelligence</a>
+            <a href="fixes.html"><i data-lucide="code-2"></i> AI Code Fixes</a>
+            <a href="retest.html"><i data-lucide="refresh-cw"></i> Auto Re-Test</a>
+            <a href="reports.html"><i data-lucide="file-bar-chart"></i> Reports</a>
+            <a href="chat.html"><i data-lucide="bot"></i> UX Copilot</a>
+            <a href="login.html" class="nav-terminate"><i data-lucide="log-out"></i> Terminate</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>🔍 Auditing Results & Design Health</h2>
+            <p>AI-powered analysis identifying friction points, accessibility gaps, and design clarity issues.</p>
+        </div>
+
+        <div class="score-metrics-row">
+            <div class="score-box">
+                <div style="font-size:1.5rem;margin-bottom:0.5rem;">🎨</div>
+                <div class="score-label">Design Clarity Rating</div>
+                <div class="score-num text-glow" id="navClarity">--</div>
+                <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">/ 10</div>
+            </div>
+            <div class="score-box">
+                <div style="font-size:1.5rem;margin-bottom:0.5rem;">♿</div>
+                <div class="score-label">Accessibility Issues</div>
+                <div class="score-num" style="color:var(--danger);" id="a11yFailures">--</div>
+                <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">total found</div>
+            </div>
+            <div class="score-box">
+                <div style="font-size:1.5rem;margin-bottom:0.5rem;">⚡</div>
+                <div class="score-label">Friction Events</div>
+                <div class="score-num" style="color:var(--warning);" id="frictionEvents">--</div>
+                <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">captured</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:1rem;">
+                <h3 style="margin:0;display:flex;align-items:center;gap:0.5rem;">
+                    <i data-lucide="alert-triangle" style="width:18px;height:18px;color:var(--warning);"></i>
+                    Issues Found
+                </h3>
+                <div class="filter-bar" style="margin:0;">
+                    <button class="filter-btn active" onclick="filterIssues('all', this)">All</button>
+                    <button class="filter-btn" onclick="filterIssues('critical', this)">🔴 Critical</button>
+                    <button class="filter-btn" onclick="filterIssues('high', this)">🟠 High</button>
+                    <button class="filter-btn" onclick="filterIssues('medium', this)">🔵 Medium</button>
+                </div>
+            </div>
+
+            <div id="issuesWrapper">
+                <div class="skeleton" style="height:90px;margin-bottom:0.75rem;"></div>
+                <div class="skeleton" style="height:90px;margin-bottom:0.75rem;"></div>
+                <div class="skeleton" style="height:90px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const s = document.getElementById('splash');
+                if (s) s.classList.add('hidden');
+            }, 1200);
+        });
+
+        function filterIssues(severity, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.issue-card').forEach(card => {
+                card.style.display = (severity === 'all' || card.classList.contains(severity)) ? 'block' : 'none';
+            });
+        }
+    </script>
+    <script src="js/api.js"></script>
+    <script src="js/findings.js"></script>
+    <script src="js/main.js"></script>
+    <script>document.addEventListener("DOMContentLoaded", () => { lucide.createIcons(); });</script>
+</body>
+</html>

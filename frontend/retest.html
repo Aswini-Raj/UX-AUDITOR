@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI UX Auditor — Auto Re-Test Validation</title>
+    <meta name="description" content="Compare before and after design performance scores. See how much AI code fixes improved your UX audit success rates.">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .split-panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .metric-card {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            transition: var(--transition-bounce);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+        }
+
+        .metric-card.before-card::before { background: var(--grad-danger); }
+        .metric-card.after-card::before  { background: var(--grad-success); }
+
+        .metric-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--border-bright); }
+
+        .metric-icon {
+            width: 48px; height: 48px;
+            border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 0.75rem;
+            animation: float 3s ease-in-out infinite;
+        }
+        .metric-icon svg { width: 22px; height: 22px; color: #fff; }
+
+        .before-card .metric-icon { background: var(--grad-danger); animation-delay: 0s; }
+        .after-card  .metric-icon { background: var(--grad-success); animation-delay: 1.5s; }
+
+        .metric-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem; }
+        .metric-card-sub { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem; }
+
+        .giant-percentage {
+            font-size: 5.5rem;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -0.05em;
+            margin: 0.5rem 0 1rem;
+        }
+
+        .before-card .giant-percentage { color: var(--danger); }
+        .after-card  .giant-percentage { color: var(--success); }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.45rem 1.1rem;
+            font-weight: 700;
+            font-size: 0.82rem;
+            border-radius: var(--radius-full);
+        }
+
+        .status-pill.fail    { background: rgba(239,68,68,0.12); color: #fca5a5; border: 1px solid rgba(239,68,68,0.25); }
+        .status-pill.success { background: rgba(16,185,129,0.12); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.25); }
+        .status-pill svg { width: 13px; height: 13px; }
+
+        .improvement-banner {
+            background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(6,182,212,0.07));
+            border: 1px solid rgba(16,185,129,0.25);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .improvement-num {
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            background: var(--grad-success);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .comparison-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+        }
+
+        .bar-label { font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); min-width: 60px; }
+
+        .bar-track {
+            flex: 1;
+            height: 12px;
+            background: var(--bg-primary);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: var(--radius-full);
+            transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .bar-before { background: var(--grad-danger); }
+        .bar-after  { background: var(--grad-success); }
+        .bar-pct { font-weight: 700; font-size: 0.85rem; min-width: 40px; text-align: right; }
+
+        /* ── Screenshot Comparison Section ── */
+        .screenshot-comparison {
+            margin-top: 2rem;
+        }
+
+        .screenshot-comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            margin-top: 1rem;
+        }
+
+        .screenshot-panel {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: var(--bg-card);
+        }
+
+        .screenshot-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.65rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .screenshot-panel-header.before { color: var(--danger); }
+        .screenshot-panel-header.after  { color: var(--success); }
+
+        .screenshot-panel-header svg { width: 13px; height: 13px; }
+
+        .screenshot-panel-header-badge {
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 0.1rem 0.45rem;
+            border-radius: 4px;
+        }
+        .before .screenshot-panel-header-badge {
+            background: rgba(239,68,68,0.12);
+            color: #fca5a5;
+        }
+        .after .screenshot-panel-header-badge {
+            background: rgba(16,185,129,0.12);
+            color: #6ee7b7;
+        }
+
+        .screenshot-frame-retest {
+            width: 100%;
+            height: 220px;
+            object-fit: contain;
+            display: block;
+            background: var(--bg-elevated);
+        }
+
+        .screenshot-frame-placeholder {
+            width: 100%;
+            height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.65rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            background: var(--bg-elevated);
+        }
+
+        .screenshot-frame-placeholder svg { width: 32px; height: 32px; opacity: 0.3; }
+
+        .screenshot-issues-bar {
+            padding: 0.55rem 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .screenshot-issues-bar svg { width: 11px; height: 11px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo-container">AI UX Auditor</a>
+        <div class="nav-links">
+            <a href="index.html"><i data-lucide="play-circle"></i> Initialization</a>
+            <a href="dashboard.html"><i data-lucide="activity"></i> Live Workspace</a>
+            <a href="journey.html"><i data-lucide="map"></i> Journey Map</a>
+            <a href="personas.html"><i data-lucide="users"></i> Personas</a>
+            <a href="findings.html"><i data-lucide="search"></i> UX Intelligence</a>
+            <a href="fixes.html"><i data-lucide="code-2"></i> AI Code Fixes</a>
+            <a href="retest.html" class="active"><i data-lucide="refresh-cw"></i> Auto Re-Test</a>
+            <a href="reports.html"><i data-lucide="file-bar-chart"></i> Reports</a>
+            <a href="chat.html"><i data-lucide="bot"></i> UX Copilot</a>
+            <a href="login.html" class="nav-terminate"><i data-lucide="log-out"></i> Terminate</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>Compare Design Performance</h2>
+            <p>Quantified improvement between the original design and after applying AI-generated code fixes.</p>
+        </div>
+
+        <div class="split-panels">
+            <div class="metric-card before-card" id="beforeCard">
+                <div class="metric-icon">
+                    <i data-lucide="x-circle"></i>
+                </div>
+                <h3>Original Design</h3>
+                <div class="metric-card-sub">Initial success rate before fixes</div>
+                <div class="giant-percentage" id="oldSuccess">--</div>
+                <div class="status-pill fail">
+                    <i data-lucide="x-circle"></i>
+                    Design flaws detected
+                </div>
+            </div>
+
+            <div class="metric-card after-card" id="afterCard">
+                <div class="metric-icon">
+                    <i data-lucide="check-circle"></i>
+                </div>
+                <h3>After AI Fixes</h3>
+                <div class="metric-card-sub">Estimated rate after applying fixes</div>
+                <div class="giant-percentage" id="newSuccess">--</div>
+                <div class="status-pill success">
+                    <i data-lucide="check-circle"></i>
+                    Success rate improved
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Bar -->
+        <div class="comparison-bar" id="comparisonBar" style="display:none;">
+            <div>
+                <div style="font-size:0.82rem;font-weight:700;color:var(--text-secondary);margin-bottom:0.5rem;">Before</div>
+                <div class="bar-track" style="width:180px;">
+                    <div class="bar-fill bar-before" id="barBefore" style="width:0%;"></div>
+                </div>
+            </div>
+            <div style="font-size:1.2rem;color:var(--text-muted);padding:0 0.25rem;margin-top:1.2rem;">
+                <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+            </div>
+            <div style="flex:1;">
+                <div style="font-size:0.82rem;font-weight:700;color:var(--text-secondary);margin-bottom:0.5rem;">After Fixes</div>
+                <div class="bar-track">
+                    <div class="bar-fill bar-after" id="barAfter" style="width:0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="improvement-banner" id="improvementBanner" style="display:none;">
+            <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.35rem;display:flex;align-items:center;justify-content:center;gap:0.4rem;">
+                <i data-lucide="trending-up" style="width:14px;height:14px;color:var(--success);"></i>
+                Net Performance Improvement
+            </div>
+            <div class="improvement-num" id="improvementDelta">+0%</div>
+            <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">Estimated gain from applying all AI code suggestions</div>
+        </div>
+
+        <!-- Screenshot Comparison -->
+        <div class="screenshot-comparison" id="screenshotComparison" style="display:none;">
+            <div class="section-title" style="margin-bottom:0.25rem;">
+                <i data-lucide="image" style="width:14px;height:14px;color:var(--accent-bright);"></i>
+                Page State Comparison
+            </div>
+            <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:0;">Visual comparison of the crawled page before and after applying fixes.</p>
+
+            <div class="screenshot-comparison-grid">
+                <!-- Before Screenshot -->
+                <div class="screenshot-panel">
+                    <div class="screenshot-panel-header before">
+                        <div style="display:flex;align-items:center;gap:0.35rem;">
+                            <i data-lucide="alert-triangle"></i>
+                            Before Fixes
+                        </div>
+                        <span class="screenshot-panel-header-badge">Issues Detected</span>
+                    </div>
+                    <img id="retestScreenshotBefore"
+                         src="assets/screenshots/screenshot.png"
+                         alt="Page before fixes applied"
+                         class="screenshot-frame-retest"
+                         onerror="this.style.display='none';document.getElementById('retestBeforePlaceholder').style.display='flex';">
+                    <div id="retestBeforePlaceholder" class="screenshot-frame-placeholder" style="display:none;">
+                        <i data-lucide="monitor"></i>
+                        <span>Screenshot not available</span>
+                    </div>
+                    <div class="screenshot-issues-bar" id="beforeIssuesBar">
+                        <i data-lucide="alert-circle"></i>
+                        <span id="beforeIssuesLabel">Loading issue count...</span>
+                    </div>
+                </div>
+
+                <!-- After Screenshot -->
+                <div class="screenshot-panel">
+                    <div class="screenshot-panel-header after">
+                        <div style="display:flex;align-items:center;gap:0.35rem;">
+                            <i data-lucide="check-circle"></i>
+                            After Fixes Applied
+                        </div>
+                        <span class="screenshot-panel-header-badge">Projected State</span>
+                    </div>
+                    <div class="screenshot-frame-placeholder" id="retestAfterPlaceholder">
+                        <i data-lucide="shield-check"></i>
+                        <span>Fixes applied — projected clean state</span>
+                        <span style="font-size:0.72rem;">Re-run audit to capture live screenshot</span>
+                    </div>
+                    <div class="screenshot-issues-bar" style="color:var(--success);">
+                        <i data-lucide="check-circle"></i>
+                        <span>0 issues projected after AI fixes</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/retest.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            lucide.createIcons();
+        });
+
+        // Hook into retest.js data to show comparison bars, banner, and screenshot section
+        function showComparison(before, after, issues) {
+            const bar    = document.getElementById('comparisonBar');
+            const banner = document.getElementById('improvementBanner');
+            const scComp = document.getElementById('screenshotComparison');
+
+            if (bar && banner) {
+                bar.style.display    = 'flex';
+                banner.style.display = 'block';
+                if (scComp) scComp.style.display = 'block';
+
+                setTimeout(() => {
+                    document.getElementById('barBefore').style.width    = before + '%';
+                    document.getElementById('barAfter').style.width     = after + '%';
+                    document.getElementById('improvementDelta').innerText = '+' + (after - before) + '%';
+
+                    // Update before screenshot issues label
+                    const issueCount = (issues && issues.length) ? issues.length : '—';
+                    const issueLabel = document.getElementById('beforeIssuesLabel');
+                    if (issueLabel) {
+                        issueLabel.innerText = issueCount + ' issue(s) detected before fixes';
+                    }
+
+                    lucide.createIcons();
+                }, 300);
+            }
+        }
+    </script>
+</body>
+</html>
