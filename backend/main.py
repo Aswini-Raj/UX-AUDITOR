@@ -1001,6 +1001,9 @@ Output ONLY a valid JSON object with NO extra text:
 # ---------------------------------------------------------
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+def _truncate_password(password: str) -> str:
+    return password[:72] if password else ""
+
 def get_db_connection():
     """Return a psycopg2 connection using credentials from .env / environment."""
     return psycopg2.connect(
@@ -1034,7 +1037,7 @@ def _ensure_users_table():
         # Check if the user aswi@gmail.com exists, if not seed it
         cur.execute("SELECT id FROM users WHERE email = 'aswi@gmail.com'")
         if not cur.fetchone():
-            hashed_pwd = pwd_context.hash("12345678")
+            hashed_pwd = pwd_context.hash(_truncate_password("12345678"))
             cur.execute(
                 "INSERT INTO users (name, email, password_hash) VALUES (%s, %s, %s)",
                 ("Aswini", "aswi@gmail.com", hashed_pwd)
@@ -1062,7 +1065,7 @@ async def register_user(payload: RegisterRequest):
             conn.close()
             raise HTTPException(status_code=400, detail="An account with this email already exists.")
         
-        hashed_password = pwd_context.hash(payload.password)
+        hashed_password = pwd_context.hash(_truncate_password(payload.password))
         cur.execute(
             "INSERT INTO users (name, email, password_hash) VALUES (%s, %s, %s) RETURNING id, name, email",
             (payload.name, payload.email, hashed_password)
@@ -1087,7 +1090,7 @@ async def login_user(payload: LoginRequest):
         cur.close()
         conn.close()
         
-        if not user or not pwd_context.verify(payload.password, user["password_hash"]):
+        if not user or not pwd_context.verify(_truncate_password(payload.password), user["password_hash"]):
             raise HTTPException(status_code=401, detail="Invalid email or password.")
         
         return {

@@ -1,14 +1,29 @@
-/**
- * Shared Application UI Lifecycle Manager
- * Handles state validation and menu sync on local presentation viewports.
- */
+// Immediate Auth Guard: Redirect unauthenticated users to login page
+(function checkAuth() {
+    const user = localStorage.getItem("user");
+    const currentPath = window.location.pathname.split("/").pop();
+    if (!user && currentPath !== "login.html") {
+        window.location.href = "login.html";
+    }
+})();
+
 document.addEventListener("DOMContentLoaded", () => {
     configureGlobalNavbarActiveState();
     injectGlobalLifecycleFooter();
+    setupLogoutHandler();
     if (typeof lucide !== "undefined") {
         lucide.createIcons();
     }
 });
+
+function setupLogoutHandler() {
+    const terminateBtn = document.querySelector(".nav-terminate");
+    if (terminateBtn) {
+        terminateBtn.addEventListener("click", () => {
+            localStorage.removeItem("user");
+        });
+    }
+}
 
 /**
  * Automatically calculates current path name to apply active states
