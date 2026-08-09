@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -119,7 +120,10 @@
             gap: 0.4rem;
         }
 
-        .url-prefix svg { width: 15px; height: 15px; }
+        .url-prefix svg {
+            width: 15px;
+            height: 15px;
+        }
 
         #targetUrl {
             padding-left: 3rem;
@@ -152,13 +156,14 @@
         .option-card:hover {
             border-color: var(--accent-color);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79,70,229,0.1);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
         }
 
         .option-card input[type="radio"] {
             position: absolute;
             opacity: 0;
-            width: 0; height: 0;
+            width: 0;
+            height: 0;
         }
 
         .option-card .option-icon {
@@ -190,8 +195,8 @@
 
         .option-card.selected {
             border-color: var(--accent-color);
-            background: linear-gradient(135deg, rgba(79,70,229,0.04), rgba(124,58,237,0.02));
-            box-shadow: 0 0 0 3px rgba(79,70,229,0.08);
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.04), rgba(124, 58, 237, 0.02));
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08);
         }
 
         .option-card.selected::after {
@@ -199,7 +204,8 @@
             position: absolute;
             top: 0.6rem;
             right: 0.6rem;
-            width: 18px; height: 18px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             background: linear-gradient(135deg, #4f46e5, #7c3aed);
             color: white;
@@ -213,7 +219,9 @@
         }
 
         @media (max-width: 600px) {
-            .grid-options { grid-template-columns: 1fr; }
+            .grid-options {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* ── Submit Button ── */
@@ -240,6 +248,7 @@
         }
     </style>
 </head>
+
 <body>
     <nav class="navbar">
         <a href="index.html" class="logo-container">✨ AI UX Auditor</a>
@@ -265,7 +274,8 @@
         <h1 class="hero-title">
             Check Your Website's <span class="highlight">User Experience</span><br>Instantly
         </h1>
-        <p class="hero-desc">Enter your website address below. Our checker will scan your page for accessibility issues, readability, and checkout problems in seconds.</p>
+        <p class="hero-desc">Enter your website address below. Our checker will scan your page for accessibility issues,
+            readability, and checkout problems in seconds.</p>
 
         <div class="stats-row">
             <div class="stat-item">
@@ -291,44 +301,52 @@
         <div class="audit-card">
             <div class="card card-accent">
                 <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;">
-                    <div style="width:36px;height:36px;border-radius:10px;background:var(--grad-brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(99,102,241,0.25);">
+                    <div
+                        style="width:36px;height:36px;border-radius:10px;background:var(--grad-brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(99,102,241,0.25);">
                         <i data-lucide="settings-2" style="width:18px;height:18px;color:white;"></i>
                     </div>
                     <div>
                         <h2 style="font-size:1.15rem;margin:0;">Setup Your Scan</h2>
-                        <p style="font-size:0.82rem;color:var(--text-secondary);margin:0;">Enter your website link and select what you want to check</p>
+                        <p style="font-size:0.82rem;color:var(--text-secondary);margin:0;">Enter your website link and
+                            select what you want to check</p>
                     </div>
                 </div>
 
                 <form id="auditForm">
                     <div class="form-group">
-                        <label><i data-lucide="globe" style="width:13px;height:13px;"></i> Enter Website Address (URL)</label>
+                        <label><i data-lucide="globe" style="width:13px;height:13px;"></i> Enter Website Address
+                            (URL)</label>
                         <div class="url-input-wrap">
                             <span class="url-prefix"><i data-lucide="link"></i></span>
-                            <input type="url" id="targetUrl" class="form-control" placeholder="https://example.com" required>
+                            <input type="url" id="targetUrl" class="form-control" placeholder="https://example.com"
+                                required>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label><i data-lucide="target" style="width:13px;height:13px;"></i> What do you want to test?</label>
+                        <label><i data-lucide="target" style="width:13px;height:13px;"></i> What do you want to
+                            test?</label>
                         <div class="grid-options">
                             <label class="option-card selected">
                                 <input type="radio" name="goal" value="signup" checked>
                                 <span class="option-icon">🚀</span>
                                 <h4>Sign-Up Flow</h4>
-                                <p>Checks for issues when creating a new account (e.g. form fields, descriptive labels, and button layout).</p>
+                                <p>Checks for issues when creating a new account (e.g. form fields, descriptive labels,
+                                    and button layout).</p>
                             </label>
                             <label class="option-card">
                                 <input type="radio" name="goal" value="login">
                                 <span class="option-icon">🔐</span>
                                 <h4>Login Screen</h4>
-                                <p>Scans the sign-in form for readability, clear inputs, and helpful error indications.</p>
+                                <p>Scans the sign-in form for readability, clear inputs, and helpful error indications.
+                                </p>
                             </label>
                             <label class="option-card">
                                 <input type="radio" name="goal" value="checkout">
                                 <span class="option-icon">🛒</span>
                                 <h4>Checkout & Cart</h4>
-                                <p>Analyzes the purchase page for visual clarity, button placement, and ordering hurdles.</p>
+                                <p>Analyzes the purchase page for visual clarity, button placement, and ordering
+                                    hurdles.</p>
                             </label>
                         </div>
                     </div>
@@ -359,7 +377,7 @@
         });
 
         document.querySelectorAll('.option-card').forEach(card => {
-            card.addEventListener('click', function() {
+            card.addEventListener('click', function () {
                 const radio = this.querySelector('input[type="radio"]');
                 if (radio) {
                     radio.checked = true;
@@ -385,14 +403,14 @@
             localStorage.setItem('currentAuditGoal', payload.goal);
 
             try {
-                const res = await fetch('http://127.0.0.1:8000/api/audit/start', {
+                const res = await fetch('https://ux-auditor-backend.onrender.com/api/audit/start', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 const data = await res.json();
                 window.location.href = `dashboard.html?task_id=${data.task_id}`;
-            } catch(err) {
+            } catch (err) {
                 btn.innerHTML = '<i data-lucide="cpu" style="width:16px;height:16px;"></i> Initialize Orchestrator Agent';
                 btn.disabled = false;
                 lucide.createIcons();
@@ -404,4 +422,5 @@
     <script src="js/audit.js"></script>
     <script src="js/main.js"></script>
 </body>
+
 </html>

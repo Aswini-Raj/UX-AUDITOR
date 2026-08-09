@@ -119,7 +119,7 @@ async function handleAuditSubmit(event) {
     localStorage.setItem('auditStartTime', new Date().toISOString());
 
     try {
-        const response = await fetch('http://127.0.0.1:8000/api/audit/start', {
+        const response = await fetch('https://ux-auditor-backend.onrender.com/api/audit/start', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)

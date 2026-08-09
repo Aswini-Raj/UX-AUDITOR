@@ -2,7 +2,7 @@
  * Shared Fetch Abstraction Layer
  * Interfaces directly with the FastAPI server running on localhost port 8000.
  */
-const BASE_URL = 'http://127.0.0.1:8000/api';
+const BASE_URL = 'https://ux-auditor-backend.onrender.com/api';
 
 const API = {
     /**
